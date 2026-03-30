@@ -1,0 +1,72 @@
+CREATE DATABASE IF NOT EXISTS orbitcloud;
+USE orbitcloud;
+
+CREATE TABLE IF NOT EXISTS animes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    alt_title VARCHAR(255),
+    slug VARCHAR(255) UNIQUE NOT NULL,
+    synopsis TEXT,
+    image_url VARCHAR(500),
+    type VARCHAR(50) DEFAULT 'Anime',
+    status VARCHAR(50) DEFAULT 'Unknown',
+    rating VARCHAR(10),
+    source VARCHAR(50),
+    source_link VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS episodes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    anime_id INT NOT NULL,
+    episode_num VARCHAR(50) NOT NULL,
+    title VARCHAR(255),
+    video_url TEXT,
+    source_link VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (anime_id) REFERENCES animes(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS genres (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS anime_genres (
+    anime_id INT NOT NULL,
+    genre_id INT NOT NULL,
+    PRIMARY KEY (anime_id, genre_id),
+    FOREIGN KEY (anime_id) REFERENCES animes(id) ON DELETE CASCADE,
+    FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) DEFAULT 'user',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS bookmarks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    anime_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_bookmark (user_id, anime_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (anime_id) REFERENCES animes(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS history (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    anime_id INT NOT NULL,
+    episode_id INT,
+    watched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (anime_id) REFERENCES animes(id) ON DELETE CASCADE,
+    FOREIGN KEY (episode_id) REFERENCES episodes(id) ON DELETE SET NULL
+);
